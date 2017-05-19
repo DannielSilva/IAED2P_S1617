@@ -33,6 +33,7 @@ int STcount(link);
 int count(link);
 link max(link);
 link min(link);
+Item percorreAte(link, int (*cond)(Item));
 
 int height(link);
 link rotL(link);

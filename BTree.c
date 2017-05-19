@@ -41,9 +41,9 @@ link deleteR(link h, Key k) {
 	if (h == NULL){
 		return h;
 	} else if (less(k, key(h->item))) {
-		h->l = deleteR(h->l,k);
+		h->l = deleteR(h->l, k);
 	} else if (less(key(h->item), k)) {
-		h->r = deleteR(h->r,k);
+		h->r = deleteR(h->r, k);
 	} else {
 		if (h->l != NULL && h->r != NULL) {
 			link aux = max(h->l);
@@ -57,7 +57,7 @@ link deleteR(link h, Key k) {
 		} else {
 			link aux = h;
 			if (h->l == NULL && h->r == NULL){
-				h=NULL;
+				h = NULL;
 			} else if (h->l == NULL) {
 				h = h->r;
 			} else {
@@ -113,22 +113,10 @@ if (h == NULL){
 };
 	h->l = freeR(h->l);
 	h->r = freeR(h->r);
-	return deleteR(h,key(h->item));
+	return deleteR(h, key(h->item));
 };
 
 //OTHERS
-int STcount(link head) {
-	return count(head);
-};
-
-int count(link h) {
-	if (h == NULL) {
-		return 0;
-	} else {
-		return count(h->r) + count(h->l) + 1;
-	};
-};
-
 link max(link h) {
 	while (h != NULL && h->r != NULL) {
 		h = h->r;
@@ -141,6 +129,18 @@ link min(link h) {
 		h = h->l;
 	};
 	return h;
+};
+
+Item percorreAte(link h, int (*cond)(Item)) {
+	if (h == NULL){
+		return NULL;
+	};
+	Item maxItem = percorreAte(h->l, cond);
+	if (maxItem == NULL){
+		return !cond(h->item) ? h->item : percorreAte(h->r, cond);
+	} else {
+		return maxItem;
+	};
 };
 
 //AUX
@@ -157,10 +157,12 @@ link rotL(link h) {
 	h->r = x->l;
 	x->l = h;
 
-	height_left = height(h->l); height_right = height(h->r);
+	height_left = height(h->l);
+	height_right = height(h->r);
 	h->height = height_left > height_right ? height_left + 1 : height_right + 1;
 
-	height_left = height(x->l); height_right = height(x->r);
+	height_left = height(x->l);
+	height_right = height(x->r);
 	x->height = height_left > height_right ? height_left + 1 : height_right + 1;
 
 	return x;
@@ -172,10 +174,12 @@ link rotR(link h) {
 	h->l = x->r;
 	x->r = h;
 
-	height_left = height(h->l); height_right = height(h->r);
+	height_left = height(h->l);
+	height_right = height(h->r);
 	h->height = height_left > height_right ? height_left + 1 : height_right + 1;
 
-	height_left = height(x->l); height_right = height(x->r);
+	height_left = height(x->l);
+	height_right = height(x->r);
 	x->height = height_left > height_right ? height_left + 1 : height_right + 1;
 
 	return x;
