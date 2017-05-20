@@ -9,10 +9,10 @@
 /* DEFINICAO DE CONSTANTES */
 #define MAXCHARS 8 //para a chave do produto
 #define maior(A,B) A > B ? A : B
- ///METER TODOS OS CHAR* a KEY
- //APAGAR FUNCOES INUTEIS
+///METER TODOS OS CHAR* a KEY
+//APAGAR FUNCOES INUTEIS
 static link head;
-int nProds = 0; int maxQuant = 0; int maxNum = 0;
+int nProds = 0; int maxQuant = 0; int maxNum = 0; Item maxPoint = NULL;
 
 void addProduto();
 void readChave(char*);
@@ -37,7 +37,7 @@ int main() {
 				STsort(head, visitItem);
 				break;
 			case 'm':
-				if (/*maxNum && */nProds) {
+				if (nProds) {
 					maxProduto();
 				};
 				break;
@@ -74,19 +74,26 @@ void addProduto() {
 		nProds++;
 	} else { //Se o produto ja existir
 		if (maxQuant == existIt->quantidade && unis < 0 && maxQuant) {
-			//Se subtrair produtos ao item maximo, e o maximo nao for ja 0
+			//Se subtrair numeros ao produto maximo, e o maximo nao for ja 0
+			if (existIt == maxPoint) { //Se for o maximo guardado
+				maxPoint = NULL;
+			};
 			maxNum--;
-			//if (!maxNum) maxQuant = -1;
 		};
 		//Fazer calculos
 		existIt->quantidade += unis;
 		existIt->quantidade = maior(existIt->quantidade, 0);
 	};
+
 	//Definir o novo maximo
-	if (maxQuant < existIt->quantidade) {
+	if (maxQuant < existIt->quantidade) { //For um maximo novo
 		maxQuant = existIt->quantidade;
+		maxPoint = existIt;
 		maxNum = 1;
-	} else if (maxQuant == existIt->quantidade) {
+	} else if (maxQuant == existIt->quantidade) { //For um maximo existente
+		if (!maxPoint || strcmp(existIt->chave, maxPoint->chave) < 0){
+			maxPoint = existIt;
+		};
 		maxNum++;
 	};
 };
@@ -96,10 +103,11 @@ void removeProduto() {
 	readChave(chave);
 	existIt = STsearch(head, chave);
 	if (existIt != NULL) {
-		if (maxQuant == existIt->quantidade) {
-			//Se for um dos maximos
+		if (maxQuant == existIt->quantidade) { //Se for um dos maximos
+			if (existIt == maxPoint) { //Se for o maximo guardado
+				maxPoint = NULL;
+			};
 			maxNum--;
-			//if (!maxNum) maxQuant = -1;
 		};
 		STdelete(&head, chave);
 		nProds--;
@@ -108,11 +116,16 @@ void removeProduto() {
 
 void maxProduto() {
 	Item maxItem;
-	if (maxNum) {
-		maxItem = search4QuantidadeMax();
-	} else {
+	if (maxNum) { //Se houver quantidade maxima guardada
+		if (maxPoint) { //Se tivermos ponteiro para o maximo
+			maxItem = maxPoint;
+		} else { //Se tivermos de procurar
+			maxItem = search4QuantidadeMax();
+			maxPoint = maxItem;
+		};
+	} else { //Se nao houver
 		maxItem = searchMax();
-
+		maxPoint = maxItem;
 	};
 	visitItem(maxItem);
 };
@@ -129,7 +142,7 @@ Item searchMax() {
 	int max = -1; Item maxItem;
 	auxMax(head, &max, &maxItem);
 	maxQuant = max;
-	return (maxItem);
+	return maxItem;
 };
 
 void auxMax(link h, int* pmax, Item* p_maxItem) {
@@ -140,10 +153,8 @@ void auxMax(link h, int* pmax, Item* p_maxItem) {
 	if (h->item->quantidade > *pmax) {
 		*pmax = h->item->quantidade;
 		*p_maxItem = h->item;
-		//printf("bef maxNum = 1 maxnum %d act %d %s max %d\n", maxNum, h->item->quantidade, h->item->chave, *pmax);
 		maxNum = 1;
 	} else if (h->item->quantidade == *pmax) {
-		//printf("bef maxNum++ maxnum %d act %s max %d\n", maxNum, h->item->chave, *pmax);
 		maxNum++;
 	};
 	auxMax(h->r, pmax, p_maxItem);

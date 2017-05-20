@@ -15,7 +15,6 @@
 /* DEFINICAO DE ESTRUTURAS*/
 typedef char* Key;
 typedef struct produto {
-	//char chave[MAXCHARS+1];
 	char* chave;
 	int quantidade;
 } *Item;
