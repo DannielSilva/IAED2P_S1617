@@ -1,29 +1,46 @@
-/* Joao Daniel Silva 86445 ~ Francisco do Canto Sousa 86416 */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~ Joao Daniel Silva 86445 ~ Francisco do Canto Sousa 86416 ~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-/* BIBLIOTECAS */
+/****************************************************************************/
+/******************************** BIBLIOTECAS *******************************/
+/****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include "BTree.h"
 #include "Item.h"
 
-/* DEFINICAO DE CONSTANTES */
+/****************************************************************************/
+/******************************** CONSTANTES ********************************/
+/****************************************************************************/
 #define MAXCHARS 8 //para a chave do produto
 #define maior(A,B) A > B ? A : B
-///METER TODOS OS CHAR* a KEY
-//APAGAR FUNCOES INUTEIS
-static link head;
-int nProds = 0; int maxQuant = 0; int maxNum = 0; Item maxPoint = NULL;
 
+/****************************************************************************/
+/***************************** VARIAVEIS GLOBAIS ****************************/
+/****************************************************************************/
+static link head; //arvore
+int nProds = 0, //numero de produtos
+maxQuant = 0, maxNum = 0; //quantidade max e numero de produtos com essa quanti
+Item maxPoint = NULL; //produto com a quantidade maxima e menor chave
+
+
+/****************************************************************************/
+/******************************** PROTOTIPOS ********************************/
+/****************************************************************************/
 void addProduto();
-void readChave(char*);
+void readChave(Key);
 void removeProduto();
 void maxProduto();
+
 Item searchMax();
-void auxMax(link, int*, Item*);
-
 Item search4QuantidadeMax();
-int sameQuant(Item);
 
+/****************************************************************************/
+/*********************************** MAIN ***********************************/
+/****************************************************************************/
 int main() {
 	int done = 0; char command;
 	STinit(&head);
@@ -47,7 +64,7 @@ int main() {
 			case 'x':
 				STfree(&head);
 				printf("%d\n", nProds);
-				done = 1; //altera o valor da variavel de controlo para interromper o ciclo
+				done = 1; //interrompe o ciclo
 				break;
 			default: printf("ERRO: Comando desconhecido\n");
 		};
@@ -55,7 +72,10 @@ int main() {
 	return 0;
 };
 
-void readChave(char* chave) {
+/****************************************************************************/
+/***************************** FUNCOES DE LEITURA ***************************/
+/****************************************************************************/
+void readChave(Key chave) {
 	scanf("%s", chave);
 };
 
@@ -63,12 +83,16 @@ void readUnidades(int* uni) {
 	scanf("%d", uni);
 };
 
+/****************************************************************************/
+/****************************** FUNCOES DA MAIN *****************************/
+/****************************************************************************/
 void addProduto() {
 	Item existIt; char chave[MAXCHARS+1]; int unis;
 	readChave(chave);
 	readUnidades(&unis);
 	existIt = STsearch(head, chave);
-	if (existIt == NULL) { //Se a chave nao for encontrada
+
+	if (!existIt) { //Se a chave nao for encontrada
 		existIt = newItem(chave, unis);
 		STinsert(&head, existIt);
 		nProds++;
@@ -86,12 +110,12 @@ void addProduto() {
 	};
 
 	//Definir o novo maximo
-	if (maxQuant < existIt->quantidade) { //For um maximo novo
+	if (maxQuant < existIt->quantidade) { //Se for um maximo novo
 		maxQuant = existIt->quantidade;
 		maxPoint = existIt;
 		maxNum = 1;
-	} else if (maxQuant == existIt->quantidade) { //For um maximo existente
-		if (!maxPoint || strcmp(existIt->chave, maxPoint->chave) < 0){
+	} else if (maxQuant == existIt->quantidade) { //Se for um maximo existente
+		if (!maxPoint || strcmp(existIt->chave, maxPoint->chave) < 0) {
 			maxPoint = existIt;
 		};
 		maxNum++;
@@ -102,7 +126,7 @@ void removeProduto() {
 	Item existIt; char chave[MAXCHARS+1];
 	readChave(chave);
 	existIt = STsearch(head, chave);
-	if (existIt != NULL) {
+	if (existIt) {
 		if (maxQuant == existIt->quantidade) { //Se for um dos maximos
 			if (existIt == maxPoint) { //Se for o maximo guardado
 				maxPoint = NULL;
@@ -115,27 +139,21 @@ void removeProduto() {
 };
 
 void maxProduto() {
-	Item maxItem;
 	if (maxNum) { //Se houver quantidade maxima guardada
-		if (maxPoint) { //Se tivermos ponteiro para o maximo
-			maxItem = maxPoint;
-		} else { //Se tivermos de procurar
-			maxItem = search4QuantidadeMax();
-			maxPoint = maxItem;
+		if (!maxPoint) { //Se tivermos de procurar ponteiro para o maximo
+			maxPoint = search4QuantidadeMax();
 		};
-	} else { //Se nao houver
-		maxItem = searchMax();
-		maxPoint = maxItem;
+	} else { //Se nao houver quantidade guardada
+		maxPoint = searchMax();
 	};
-	visitItem(maxItem);
+	visitItem(maxPoint);
 };
 
+/****************************************************************************/
+/****************************** FUNCOES DO MAXIMO ***************************/
+/****************************************************************************/
 Item search4QuantidadeMax() {
-	return percorreAte(head, sameQuant);
-};
-
-int sameQuant(Item item) {
-	return item->quantidade - maxQuant;
+	return percorreAte(head, equalMax);
 };
 
 Item searchMax() {
@@ -143,19 +161,4 @@ Item searchMax() {
 	auxMax(head, &max, &maxItem);
 	maxQuant = max;
 	return maxItem;
-};
-
-void auxMax(link h, int* pmax, Item* p_maxItem) {
-	if (h == NULL) {
-		return;
-	};
-	auxMax(h->l, pmax, p_maxItem);
-	if (h->item->quantidade > *pmax) {
-		*pmax = h->item->quantidade;
-		*p_maxItem = h->item;
-		maxNum = 1;
-	} else if (h->item->quantidade == *pmax) {
-		maxNum++;
-	};
-	auxMax(h->r, pmax, p_maxItem);
 };
